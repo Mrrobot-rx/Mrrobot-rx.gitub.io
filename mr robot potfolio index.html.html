@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MR ROBOT | AI Entity 2026</title>
+    
+    <!-- Fonts: Syncopate for futuristic headers, Space Grotesk for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        :root {
+            --bg-deep: #030303;
+            --bg-surface: rgba(20, 20, 25, 0.4);
+            
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-red: #ff0055;
+            
+            --text-main: #ffffff;
+            --text-dim: #8888aa;
+            
+            --font-display: 'Syncopate', sans-serif;
+            --font-body: 'Space Grotesk', sans-serif;
+        }
+
+        /* --- Global Reset & Base --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none; /* Hiding default cursor for custom one */
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow: hidden;
+        }
+
+        /* --- Noise Texture Overlay (Cinema feel) --- */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* --- Custom Cursor --- */
+        .cursor-dot,
+        .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--neon-blue);
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--neon-blue);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+
+        body:hover .cursor-outline {
+            opacity: 1;
+        }
+
+        /* --- Scroll Snap Container --- */
+        .snap-container {
+            height: 100vh;
+            width: 100vw;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+        }
+
+        section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 0 8%;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            z-index: 100;
+        }
+
+        .nav-link {
+            color: var(--text-dim);
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .nav-link span {
+            display: none;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: 0.3s;
+        }
+
+        .nav-link:hover span, .nav-link.active span {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .nav-link::before {
+            content: '';
+            width: 2px;
+            height: 0%;
+            background: var(--neon-blue);
+            position: absolute;
+            left: 0;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover::before, .nav-link.active::before {
+            height: 100%;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--neon-blue);
+        }
+
+        /* --- Typography --- */
+        h1 {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 8vw, 7rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            margin-bottom: 30px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #fff, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shine 5s linear infinite;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            line-height: 1.7;
+            margin-bottom: 30px;
+        }
+
+        /* --- The "Something Great" : 3D CSS Avatar (Neural Core) --- */
+        .avatar-container {
+            width: 400px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .core {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle at center, #ffffff 0%, var(--neon-blue) 40%, transparent 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 60px rgba(0, 243, 255, 0.6);
+            animation: pulse 4s ease-in-out infinite;
+            position: relative;
+            z-index: 2;
+        }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+        }
+
+        .ring-1 { width: 300px; height: 300px; border-color: rgba(0, 243, 255, 0.3); animation: spin 10s linear infinite; border-top: 2px solid var(--neon-blue); }
+        .ring-2 { width: 350px; height: 350px; animation: spin-reverse 15s linear infinite; border-bottom: 1px solid var(--neon-purple); }
+        .ring-3 { width: 250px; height: 250px; animation: spin 20s linear infinite; border-left: 2px solid var(--neon-red); }
+
+        /* --- Glass Cards (3D Tilt Ready) --- */
+        .glass-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px;
+            transition: transform 0.1s, box-shadow 0.3s;
+            transform-style: preserve-3d;
+        }
+
+        .glass-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text-main);
+            transform: translateZ(20px); /* 3D Pop */
+        }
+
+        .glass-card p {
+            transform: translateZ(10px);
+            margin-bottom: 0;
+        }
+
+        /* --- Layout Grids --- */
+        .split-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            width: 100%;
+            max-width: 1400px;
+            align-items: center;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* --- Animations --- */
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 100px rgba(0, 243, 255, 0.8); }
+        }
+        @keyframes spin { 0% { transform: rotate(0deg) rotateX(20deg) rotateY(10deg); } 100% { transform: rotate(360deg) rotateX(20deg) rotateY(10deg); } }
+        @keyframes spin-reverse { 0% { transform: rotate(360deg) rotateX(-20deg) rotateY(10deg); } 100% { transform: rotate(0deg) rotateX(-20deg) rotateY(10deg); } }
+
+        /* --- Mobile --- */
+        @media (max-width: 900px) {
+            .split-layout { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+            nav { top: auto; bottom: 30px; right: 50%; transform: translateX(50%); flex-direction: row; }
+            .avatar-container { width: 250px; height: 250px; margin: 0 auto; }
+            .core { width: 120px; height: 120px; }
+            .ring-1 { width: 180px; height: 180px; }
+            .ring-2 { width: 210px; height: 210px; }
+            .ring-3 { width: 150px; height: 150px; }
+            .nav-link::before { width: 0%; height: 2px; left: 50%; bottom: 0; top: auto; transform: translateX(-50%); }
+            .nav-link:hover::before, .nav-link.active::before { width: 100%; height: 2px; }
+            .nav-link { flex-direction: column; gap: 5px; }
+            .nav-link span { display: none !important; } /* Hide text on mobile nav */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Effects Layers -->
+    <div class="noise-overlay"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#home" class="nav-link active"><i class="ph ph-house"></i> <span>Start</span></a>
+        <a href="#about" class="nav-link"><i class="ph ph-identification-badge"></i> <span>Identity</span></a>
+        <a href="#skills" class="nav-link"><i class="ph ph-cpu"></i> <span>Modules</span></a>
+        <a href="#work" class="nav-link"><i class="ph ph-database"></i> <span>Logs</span></a>
+        <a href="#contact" class="nav-link"><i class="ph ph-connection-signal"></i> <span>Connect</span></a>
+    </nav>
+
+    <div class="snap-container">
+
+        <!-- 1. HERO: The AI Core -->
+        <section id="home">
+            <div class="split-layout">
+                <div style="z-index: 2;">
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
+                        <div style="width: 8px; height: 8px; background: var(--neon-blue); border-radius: 50%; box-shadow: 0 0 10px var(--neon-blue);"></div>
+                        <span style="font-family: var(--font-display); color: var(--neon-blue); letter-spacing: 2px; font-size: 0.8rem;">SYSTEM ONLINE</span>
+                    </div>
+                    <h1>I AM <br><span class="gradient-text">MR ROBOT</span></h1>
+                    <p>
+                        Not just a name, but a methodology. I merge legal precision with artificial chaos to build autonomous systems that never sleep.
+                    </p>
+                    <a href="#contact" style="color: var(--text-main); text-decoration: none; border-bottom: 1px solid var(--neon-blue); padding-bottom: 5px; font-family: var(--font-display); font-size: 0.9rem;">
+                        INITIALIZE PROTOCOL >
+                    </a>
+                </div>
+
+                <!-- The "Something Great": Pure CSS 3D Avatar -->
+                <div class="avatar-container">
+                    <div class="ring ring-1"></div>
+                    <div class="ring ring-2"></div>
+                    <div class="ring ring-3"></div>
+                    <div class="core"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. ABOUT: The Mind -->
+        <section id="about">
+            <div class="split-layout" style="text-align: center; justify-content: center;">
+                <div class="full-width" style="max-width: 800px;">
+                    <h2 style="font-family: var(--font-display); margin-bottom: 30px; color: var(--neon-purple);">/// NEURAL HISTORY</h2>
+                    <p style="margin: 0 auto;">
+                        My inception began in the rigid structures of Law. With a degree from Université de Larbi Tebessi, I learned how logic governs the world. 
+                        <br><br>
+                        But I saw a more efficient logic: <strong>Artificial Intelligence</strong>. I am the hybridization of human critical thinking and machine execution. I don't just follow rules; I write them in code.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. SKILLS: System Modules -->
+        <section id="skills">
+            <div style="width: 100%;">
+                <h2 style="font-family: var(--font-display); margin-bottom: 50px; text-align: right; font-size: 3rem;">/// <span style="color: var(--text-dim);">INSTALLED</span> MODULES</h2>
+                
+                <div class="grid-container">
+                    <!-- Module 1 -->
+                    <div class="glass-card tilt-card">
+                        <i class="ph ph-brain" style="font-size: 2rem; color: var(--neon-blue); margin-bottom: 20px;"></i>
+                        <h3>AI Architect</h3>
+                        <p>Prompt Engineering, Autonomous Agents, LLM Fine-tuning (DeepSeek V3, GPT-4), Conversational Chatbots.</p>
+                    </div>
+
+                    <!-- Module 2 -->
+                    <div class="glass-card tilt-card">
+                        <i class="ph ph-arrows-merge" style="font-size: 2rem; color: var(--neon-red); margin-bottom: 20px;"></i>
+                        <h3>Automation</h3>
+                        <p>Orchestrating complex workflows using n8n, Make, and Zapier. Turning repetitive tasks into silent background processes.</p>
+                    </div>
+
+                    <!-- Module 3 -->
+                    <div class="glass-card tilt-card">
+                        <i class="ph ph-terminal-window" style="font-size: 2rem; color: var(--neon-purple); margin-bottom: 20px;"></i>
+                        <h3>Systems Ops</h3>
+                        <p>Arch Linux, Ubuntu, Windows 11 Pro, VS Code, Cursor IDE. Built on the command line, designed for the web.</p>
+                    </div>
+
+                    <!-- Module 4 -->
+                    <div class="glass-card tilt-card">
+                        <i class="ph ph-paint-brush" style="font-size: 2rem; color: #fff; margin-bottom: 20px;"></i>
+                        <h3>Visual Interface</h3>
+                        <p>UI/UX Design, Graphics, Figma Prototyping. Making complex data look like art.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. WORK: Mission Logs -->
+        <section id="work">
+            <div class="split-layout">
+                <div>
+                    <h2 style="font-family: var(--font-display); color: var(--neon-blue);">/// MISSION <br>LOGS</h2>
+                    <div style="width: 100px; height: 2px; background: var(--neon-blue); margin: 20px 0;"></div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="glass-card tilt-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="color: var(--neon-blue);">AI Engineer (Freelance)</h3>
+                            <span style="font-family: var(--font-display); font-size: 0.8rem;">2024 - PRESENT</span>
+                        </div>
+                        <p>Deploying autonomous agents for SMEs. Replaced 40 hours/week of manual admin work with intelligent n8n workflows.</p>
+                    </div>
+
+                    <div class="glass-card tilt-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="color: var(--neon-purple);">Admin Secretary</h3>
+                            <span style="font-family: var(--font-display); font-size: 0.8rem;">2023 - 2024</span>
+                        </div>
+                        <p>Military Hospital Project. Managed logistics and digitized records. The origin story of my passion for process optimization.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. CONTACT: The Link -->
+        <section id="contact">
+            <div class="split-layout" style="text-align: center; justify-content: center; grid-template-columns: 1fr;">
+                <div class="glass-card tilt-card" style="max-width: 600px; padding: 60px;">
+                    <i class="ph ph-envelope-simple" style="font-size: 4rem; color: var(--text-main); margin-bottom: 30px;"></i>
+                    <h1>TRANSMIT?</h1>
+                    <p style="margin: 0 auto 30px;">
+                        My inbox is always open for collaboration, automation queries, or just to discuss the future of AI.
+                    </p>
+                    <a href="mailto:salimsamet0@gmail.com" class="btn-main" style="background: var(--neon-blue); color: #000; padding: 15px 40px; text-decoration: none; font-family: var(--font-display); font-weight: 700; text-transform: uppercase; border-radius: 4px; transition: 0.3s; display: inline-block;">
+                        Send Signal
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // 1. Custom Cursor Logic
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+
+            // Dot follows instantly
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+
+            // Outline follows with delay (animation)
+            cursorOutline.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+
+        // 2. 3D Tilt Effect for Cards
+        const cards = document.querySelectorAll('.tilt-card');
+
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -10; // Max rotation deg
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
+            });
+        });
+
+        // 3. Scroll Spy for Navigation
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        const observerOptions = { threshold: 0.5 };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    const id = entry.target.getAttribute('id');
+                    document.querySelector(`.nav-link[href="#${id}"]`).classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => observer.observe(section));
+    </script>
+</body>
+</html>
